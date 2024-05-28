@@ -1,0 +1,23 @@
+# 生成公钥命令（在gitbash中运行）
+ssh-keygen -o
+/E/海宜洁源安全共享文件/jieyuan_safety_application/海宜洁源隐患管理工具-代码/ssh公密钥.ssh
+
+# 快速确认自己是否已拥有公钥：（公钥后缀是.pub，另一个同名的是私钥）
+$ cd ~/.ssh
+$ ls
+authorized_keys2  id_dsa       known_hosts
+config            id_dsa.pub
+
+# 确保将公钥添加到了 GitHub 账户的 SSH 密钥设置中
+
+# 检查SSH 密钥是否加载到 ssh-agent：
+eval "$(ssh-agent -s)"
+ssh-add -l
+
+# 如果 ssh-add -l 没有列出你的私钥指纹，请添加私钥：
+ssh-add ~/.ssh/id_ed25519
+
+# 检查 ~/.ssh/config 文件，确保配置正确，SSH 客户端知道使用哪个密钥来连接 GitHub。
+
+# 确认是否和仓库连接
+ssh -T git@github.com:weixiansheng1/haiyijieyuan.git
