@@ -1,0 +1,8 @@
+python IDE编辑器：spyder
+
+python 环境：使用 cmd 调出doc系统， pip install + 以下环境（不要＋号）
+
+需要在excel表的隐患内容最后一行打个空格。
+
+
+

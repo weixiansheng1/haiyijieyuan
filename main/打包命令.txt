@@ -1,0 +1,89 @@
+nuitka --show-progress --remove-output --onefile
+nuitka --standalone --show-memory --show-progress --lto=no --nofollow-imports --plugin-enable=pyqt5,numpy  --prefer-source-code --output-dir=out --onefile --windows-icon-from-ico=./used.ico main_ui_1.3.py
+python3 nuitka --standalone   --follow-imports --mingw64  -–show-progress  --enable-plugin=pyqt5 --remove-output  main_ui_1_3.py
+python -m nuitka --standalone  --onefile --mingw64 --show-progress --follow-imports --include-data-dir=sqldrivers=sqldrivers  --debug --plugin-enable=data-files  --lto=no --plugin-enable=pyqt5,pylint-warnings --nofollow-import-to=numpy,pandas,sqlite,qsqlite,openpyxl,pyqlite3   --remove-output  main_ui_1_3.py 
+
+在cmd使用nuitka命令加上要打包的py文件就行了，当然，我们需要看看它有哪些好用的选项
+nuitka --help就能看到用法，这里列出几个比较常用的选项
+
+选项	                 说明
+--standalone	打包成单独的程序（可以拿到其他电脑使用）
+--enable-plugin	指定需要加载的插件，比如说tk-inter、pyqt5等
+--plugin-list	查看支持的插件
+--output-dir	输出目录，不指定则是当前工作目录
+--onefile	                打包成一个文件，即把全部文件压缩成一个（默认是多个文件和文件夹）像pyinstaller一样打包成单个exe文件
+--windows-disable-console	隐藏控制台窗口 (过时）
+--show-progress	显示打包进度
+--show-memory	显示内存占用情况
+--remove-output	打包结束之后自动清理build文件夹
+--windows-icon-from-ico	指定程序图标（针对Windows系统）
+--mingw64	指定使用MinGW6编译（默认是MSYS2）
+--msvc	                指定使用MSVC的版本，不指定则使用系统默认版本
+--company-name	公司名
+--product-name	产品名
+--file-version	文件版本，最多4个数字序列，例如1.0、1.0.0.0
+--product-version	产品版本，规则与–file-version相同
+--file-description	文件描述
+nuitka --plugin-list   不清楚该模块是否有特定的插件支持，在cmd窗口输入后查询
+nuitka --clean-cache=all 清楚缓存
+
+常规选项：
+--help：显示帮助信息并退出。
+--version：显示版本信息和重要细节，然后退出。
+模式控制：
+--module：创建一个可导入的二进制扩展模块，而不是一个程序。默认关闭。
+--standalone：启用独立模式，使生成的二进制文件可以在没有现有 Python 安装的其他机器上运行。会生成较大的文件。
+--onefile：在独立模式的基础上，生成一个压缩的可执行文件，而不是一个文件夹。
+Python 标志和调试选项：
+--python-flag=FLAG：指定 Python 运行时的标志，如 -S（不使用 site 模块），-O（禁用断言），-u（不缓存），isolated（隔离模式），等。
+--python-debug：使用调试版本的 Python。
+--python-for-scons=PATH：为 Scons 提供 Python 二进制文件的路径。
+模块和包的包含控制：
+--include-package=PACKAGE：包含整个包及其子模块。
+--include-module=MODULE：包含单个模块。
+--include-plugin-directory=MODULE/PACKAGE：包含指定目录中的代码。
+--include-plugin-files=PATTERN：包含匹配模式的文件。
+--prefer-source-code：优先使用源代码而不是已编译的扩展模块。
+导入模块的控制：
+--follow-imports：递归包含所有导入的模块。
+--follow-import-to=MODULE/PACKAGE：仅跟踪指定的模块或包。
+--nofollow-import-to=MODULE/PACKAGE：不跟踪指定的模块或包。
+--nofollow-imports：不跟踪任何导入的模块。
+数据文件选项：
+--include-package-data=PACKAGE：包含指定包的数据文件。
+--include-data-files=DESC：包含指定文件的描述。
+--include-data-dir=DIRECTORY：包含整个目录的数据文件。
+--noinclude-data-files=PATTERN：不包含匹配模式的数据文件。
+版本信息选项：
+--company-name=COMPANY_NAME：设置版本信息中的公司名称。
+--product-name=PRODUCT_NAME：设置版本信息中的产品名称。
+--file-version=FILE_VERSION：设置文件版本。
+--product-version=PRODUCT_VERSION：设置产品版本。
+--file-description=FILE_DESCRIPTION：设置文件描述。
+--copyright=COPYRIGHT_TEXT：设置版权信息。
+--trademarks=TRADEMARK_TEXT：设置商标信息。
+插件控制：
+--enable-plugins=PLUGIN_NAME：启用插件。
+--disable-plugins=PLUGIN_NAME：禁用插件。
+--user-plugin=PATH：指定用户插件文件路径。
+--plugin-list：显示所有可用插件列表并退出。
+调试特性：
+--debug：启用所有自检功能。
+--unstripped：保留调试信息。
+--profile：启用基于 vmprof 的性能分析（当前不可用）。
+--trace-execution：跟踪执行输出。
+--experimental=FLAG：启用实验性功能。
+--low-memory：尝试使用更少的内存。
+--generate-c-only：只生成 C 源代码，不编译成二进制文件或模块。
+后端 C 编译器选择：
+--clang：强制使用 clang 编译器。
+--mingw64：在 Windows 上强制使用 MinGW64 编译器。
+--msvc=MSVC_VERSION：强制使用特定版本的 MSVC 编译器。
+--jobs=N：指定并行 C 编译任务的数量。
+--lto=choice：使用链接时优化。
+--static-libpython=choice：使用静态链接的 Python 库。
+
+
+【pyinstall】
+pyinstaller --onefile --windowed main_ui_1_3.py 【成功打包】-生成单个文件，每次启动需解压
+pyinstaller --onedir --windowed main_ui_1_3.py  【成功打包】-将依赖生成目录，每次启动不用解压
