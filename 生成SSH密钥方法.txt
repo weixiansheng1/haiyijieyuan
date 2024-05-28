@@ -19,5 +19,8 @@ ssh-add ~/.ssh/id_ed25519
 
 # 检查 ~/.ssh/config 文件，确保配置正确，SSH 客户端知道使用哪个密钥来连接 GitHub。
 
+# 添加远程仓库（ssh）
+git remote add origin git@github.com:weixiansheng1/haiyijieyuan.git
+
 # 确认是否和仓库连接
-ssh -T git@github.com:weixiansheng1/haiyijieyuan.git
+ssh -T git@github.com
