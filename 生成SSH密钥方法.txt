@@ -11,16 +11,22 @@ config            id_dsa.pub
 # 确保将公钥添加到了 GitHub 账户的 SSH 密钥设置中
 
 # 检查SSH 密钥是否加载到 ssh-agent：
-eval "$(ssh-agent -s)"
+eval "$(ssh-agent -s)"   启动ssh进程
 ssh-add -l
 
 # 如果 ssh-add -l 没有列出你的私钥指纹，请添加私钥：
 ssh-add ~/.ssh/id_ed25519
 
+# 如果还是报错，可能有多个ssh进程，关闭旧的 SSH 代理：
+eval "$(ssh-agent -k)"
+
+# 检查 SSH 代理是否正在运行：
+echo " $ssh_auth_sock"
+
 # 检查 ~/.ssh/config 文件，确保配置正确，SSH 客户端知道使用哪个密钥来连接 GitHub。
 
 # 添加远程仓库（ssh）
-git remote add origin git@github.com:weixiansheng1/haiyijieyuan.git
+git remote add main git@github.com:weixiansheng1/haiyijieyuan.git
 
 # 确认是否和仓库连接
 ssh -T git@github.com
