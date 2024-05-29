@@ -17,6 +17,9 @@ ssh-add -l
 # 如果 ssh-add -l 没有列出你的私钥指纹，请添加私钥：
 ssh-add ~/.ssh/id_ed25519
 
+# 输出公钥
+cat ~/.ssh/id_rsa.pub
+
 # 如果还是报错，可能有多个ssh进程，关闭旧的 SSH 代理：
 eval "$(ssh-agent -k)"
 
@@ -30,3 +33,46 @@ git remote add main git@github.com:weixiansheng1/haiyijieyuan.git
 
 # 确认是否和仓库连接
 ssh -T git@github.com
+
+###### 每个项目单独一个ssh连接github仓库
+步骤 1: 生成 SSH 密钥对
+对于每个仓库，生成一个独特的 SSH 密钥对：
+
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+替换 "your_email@example.com" 为你的电子邮件地址。当系统提示你输入文件保存位置时，你可以选择默认位置或指定一个新位置。在生成密钥对时，你将得到一个私钥（如 id_rsa）和一个公钥（如 id_rsa.pub）。
+
+步骤 2: 为每个仓库命名密钥
+为了方便管理，为每个仓库的密钥对命名，使其与仓库相关联。例如：
+
+id_rsa_repo1 和 id_rsa_repo1.pub 用于第一个仓库。
+id_rsa_repo2 和 id_rsa_repo2.pub 用于第二个仓库。
+
+步骤 3: 添加公钥到远程仓库
+将每个仓库的公钥添加到相应的远程仓库平台（如 GitHub）：
+登录到远程仓库平台。
+进入仓库的设置页面。
+寻找 SSH 密钥部分并添加新的 SSH 密钥。
+将对应的公钥（.pub 文件的内容）粘贴进去。
+
+步骤 4: 在本地仓库配置 SSH 密钥
+在每个本地仓库中，配置 Git 使用对应的私钥：
+打开或创建 .git/config 文件，在仓库的 Git 配置中添加以下内容：
+[core]
+    sshCommand = "ssh -i /path/to/your/private/key"
+将 /path/to/your/private/key 替换为实际私钥文件的路径。
+
+例如，对于第一个仓库，配置可能是：
+[core]
+    sshCommand = "ssh -i ~/.ssh/id_rsa_repo1"
+对于第二个仓库，配置可能是：
+[core]
+    sshCommand = "ssh -i ~/.ssh/id_rsa_repo2"
+步骤 5: 推送更改
+现在，当你推送更改到远程仓库时，Git 将使用配置的私钥进行认证：
+
+git push origin main
+注意事项
+确保私钥文件的权限设置为仅限你自己读取，以保证安全：chmod 600 id_rsa_*。
+将公钥添加到远程仓库时，确保复制整个公钥内容，包括开头和结尾。
+如果你使用多个远程仓库，确保为每个仓库配置正确的 SSH 密钥路径。
+如果你使用 Git GUI 客户端，可能需要在客户端中设置 SSH 密钥路径。
