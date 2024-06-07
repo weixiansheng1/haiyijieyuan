@@ -11,9 +11,9 @@ import time
 from PyQt5.QtWidgets import( QApplication, QMainWindow, QVBoxLayout, QWidget   , QPushButton , QMessageBox    ,
                              QTextEdit   , QLabel     , QAction    , QGroupBox , QTextBrowser, QPlainTextEdit ,
                              QStatusBar  , QMenuBar   , QMenu      , QStyle    , QDateEdit   , QFileDialog    , 
-                             QRadioButton, QCheckBox  ,QTableView  , QComboBox  )
+                             QRadioButton, QCheckBox  ,QTableView  , QComboBox , QMenu )
 
-from PyQt5.QtCore    import Qt, QRegularExpression, pyqtSignal, QRect, QCoreApplication, QMetaObject, QDate, QTimer,QSettings,QVariant
+from PyQt5.QtCore    import Qt, QRegularExpression, pyqtSignal, QRect, QCoreApplication, QMetaObject, QDate, QTimer,QSettings,QVariant,QModelIndex
 from PyQt5.QtSql     import QSqlQuery,QSqlDatabase
 from PyQt5.QtGui     import QStandardItemModel, QStandardItem,QPixmap
 from collections     import defaultdict
@@ -25,7 +25,10 @@ from retification_confirmation_sheet     import write_retification_confirmation
 from notification_of_checktion           import Write_inspect_the_situation
 from Monthly_inspection_statistics_table import Write_inspect_the_situation_sheet
 from Overall_Hidden                      import overall_hidden_sheet
+from safety_checklist                    import Write_safety_checklist
+
 from setPrinter                          import MainApp
+
 
 
 
@@ -148,14 +151,19 @@ class Ui_MainWindow(object):
         self.checkBox_yhztz.setObjectName(u"checkBox_yhztz")
         self.checkBox_yhztz.setGeometry(QRect(10, 130, 111, 16))
         #self.checkBox_jcqktjb.setChecked(True)
+        
+        self.checkBox_jcb = QCheckBox(self.groupBox_sc)   # 检查表复选框
+        self.checkBox_jcb.setObjectName(u"checkBox_jcb")
+        self.checkBox_jcb.setGeometry(QRect(10, 150, 111, 16))
+        #self.checkBox_jcqktjb.setChecked(True)
 
         self.enable_radio_printer = QRadioButton(u"生成后自动打印", self.groupBox_sc) # 生成后自动打印
         self.enable_radio_printer.setObjectName(u"enable_radio_printer")
-        self.enable_radio_printer.setGeometry(QRect(9, 150, 120, 30))
+        self.enable_radio_printer.setGeometry(QRect(9, 165, 120, 30))
 
         self.pushButton_dy = QPushButton(self.groupBox_sc)  # 打印机设置
         self.pushButton_dy.setObjectName(u"pushButton_sc")
-        self.pushButton_dy.setGeometry(QRect(32, 180, 70, 23))
+        self.pushButton_dy.setGeometry(QRect(32, 190, 70, 23))
         self.pushButton_dy.setEnabled(False)
 
         self.groupBox = QGroupBox(self.centralwidget)  # 框
@@ -325,12 +333,15 @@ class Ui_MainWindow(object):
         self.checkBox_tb   .stateChanged.connect(  lambda data = self.checkBox_tb      , number = 3: self.get_output_checkbox(data,number))  # 通报
         self.checkBox_jcqktjb.stateChanged.connect(lambda data = self.checkBox_jcqktjb , number = 4: self.get_output_checkbox(data,number))  # 检查情况统计表
         self.checkBox_yhztz.stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 5: self.get_output_checkbox(data,number))  # 隐患总台账
-
+        self.checkBox_jcb  .stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 6: self.get_output_checkbox(data,number))  # 检查表
+        
 #%% 初始化tableview
-        self.set_database_and_biuldtable()              # 建立表格设置表头及连接数据库
-        self.hidden.setModel(self.load_data_to_model()) # 放入standermodel
-        self.set_row_column()                           # 设置列宽列高
-        self.set_checkbox_in_lie(False)                 # 在每行末尾添加复选框
+        self.set_database_and_biuldtable()                                       # 建立表格设置表头及连接数据库
+        self.hidden.setModel(self.load_data_to_model())                          # 放入standermodel
+        self.hidden.setContextMenuPolicy(Qt.CustomContextMenu)                   # 在单元格中显示插入行
+        self.hidden.customContextMenuRequested.connect(self.show_context_menu)
+        self.set_row_column()                                                    # 设置列宽列高
+        self.set_checkbox_in_lie(False)                                          # 在每行末尾添加复选框
 
 #%% 菜单栏动作槽
     def msgCritical(self, strInfo):
@@ -462,7 +473,6 @@ class Ui_MainWindow(object):
         # 设置所有tableview默认行高
         self.hidden.verticalHeader().setDefaultSectionSize(100) 
 
-
 #%%在每行末尾添加复选框 
     def set_checkbox_in_lie(self,select = False):
         for row in range(self.model.rowCount()):
@@ -485,9 +495,42 @@ class Ui_MainWindow(object):
             self.model.appendRow(items)
 
         return self.model
+#%% 插入行
+
+    def show_context_menu(self, pos):
+        menu = QMenu(window_yh)
+        insert_row_action = QAction("插入行", window_yh)
+        insert_row_action.triggered.connect(self.insert_row)
+        menu.addAction(insert_row_action)
+        menu.exec_(self.hidden.viewport().mapToGlobal(pos))
+
+    def insert_row(self):
+        
+        row = self.hidden.currentIndex().row() 
+        self.model.insertRow(row)
+        query = QSqlQuery("SELECT id FROM hidden")
+        hidden_count = [] 
+        
+        while query.next():   # 检查是否有结果，并获取计数值
+            hidden_count.append(query.value(0))
+            
+        hidden_count.sort(reverse=True) # 将列表逆序，避免插入错误
+
+        for old_id in hidden_count:
+            if old_id >= row:
+                #new_id =old_id +1
+                query = QSqlQuery(f"UPDATE hidden SET id={old_id+1} WHERE id ={old_id}")
+               # print('old_id:' ,old_id,'new_id', new_id,'row:',row)
+            else:
+                break
+            
+        self.row_control(row)
+
+        if not query.exec_():
+            print("保存插入行错:", query.lastError().text())
 
 
-#%% 刷新按钮 TODO:耗时太长，需要优化
+#%% 刷新按钮 
     def refresh(self):
         
         # 刷新隐患设置面板
@@ -501,25 +544,25 @@ class Ui_MainWindow(object):
     
         # 清空表格视图
         self.hidden.clearSpans()
-    
+
         # 将表格视图与新的模型连接
         self.hidden.setModel(self.model)
-    
+
         # 清空表格视图
         self.model.removeRows(0, self.model.rowCount())
-    
+
         # 重新加载数据到模型
         self.load_data_to_model()
-        
+
         # 重新设置列宽列高
         self.set_row_column()
-        
+
         # 重新在每行末尾设置复选框
         self.set_checkbox_in_lie(False)
-        
+
         # 重置勾选框
         self.get_check_data = []
-        
+
         # 清理状态显示框
         self.textBrowser.clear()
 
@@ -531,7 +574,7 @@ class Ui_MainWindow(object):
             column = index.column()
             data   = item.text()
             #print("Cell at row {}, column {} changed to: {}".format(row, column, data))
-            print('此时data,row，column：',data,row,column)
+            print('发生变化的单元格：data,row，column：',data,row,column)
             self.save_new_cell(data,row,column)
             
 #%% 对数据库插入列
@@ -542,18 +585,17 @@ class Ui_MainWindow(object):
 
 #%%保存单个单元格数据     
     def save_new_cell(self,data,row,column):
-        
+
         column_name = self.dataline[column]
         query = QSqlQuery()
         # 构造更新语句并执行  
-        update_query = f''' UPDATE hidden SET {column_name}=? WHERE id =? '''
+        update_query = f' UPDATE hidden SET {column_name}=? WHERE id =? '
         query.exec_(str(update_query))
         query.addBindValue(data)
         query.addBindValue(row)
-        print(data,row,column,column_name)
+        #print(保存的单元格data,row,column,column_name)
         if not query.exec():
             raise Exception(query.lastError().text())
-
 
 #%% 保存 
     def save_data_to_database(self):
@@ -565,7 +607,7 @@ class Ui_MainWindow(object):
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ? ,?,?,?,?,?)
             """
         )
-        
+
         for row in( range(self.model.rowCount())):
             for column in (range(len(self.list)-1)):
                 query.addBindValue(self.model.item(row, column).text())
@@ -576,21 +618,19 @@ class Ui_MainWindow(object):
 
 #%%      刷新id
     def refresh_id(self):
-        query = QSqlQuery()
-        query.prepare("SELECT id FROM hidden")
-        query.exec_()
+        query = QSqlQuery("SELECT id FROM hidden")
 
-        # 优化：如果数据量大，可以从最小的复选框开始排序，不必从头，可用异步处理
         hidden_count = [] 
         while query.next():   # 检查是否有结果，并获取计数值
-            i = 0
-            aa = query.value(i)
-            hidden_count.append(aa)
-            i += 1
-            
+            hidden_count.append(query.value(0))
         for new_id, old_id in enumerate(hidden_count):
-            self.save_new_cell(new_id, old_id, 0)
-            #print('新id:{}，旧id：{}'.format(new_id,old_id))
+            # print("new_id:",new_id,"old_id:",old_id)
+            # 已优化：如果旧id不按，不必从头，可用异步处理
+            if new_id != old_id:
+                #query = QSqlQuery(f"UPDATE hidden SET id={new_id} WHERE id ={old_id}") 
+            
+                self.save_new_cell(new_id, old_id, 0)
+
 #%% 弹簧器
     def selec_checkbox_AllorNo(self):
         self.set_checkbox_in_lie(self.select_allcheckbox.state)                     # 勾选全部 tableview 勾选框
@@ -605,14 +645,15 @@ class Ui_MainWindow(object):
 #%%新增一行并添加组件
     def add_unit_to_columns(self):
         row = self.model.rowCount()
-
-        its = [QStandardItem("{}".format(row))]
+        its = QStandardItem(f"{row}")
         self.model.appendRow(its)
+        self.row_control(row)
+    def row_control(self,row):
         
         hidden_class = self.settings.value('隐患类型下拉列表', QVariant("")).split(',') # ["一般隐患（班组级）","一般隐患（厂级）","一般隐患（公司级）"]  
         categories   = self.settings.value('检查类型下拉列表', QVariant("")).split(',') # ["自查", "查收运","查行政与应急","海宜查", "政府部门查", "安保部查"]
         fuck_hidden  = self.settings.value('隐患级别下拉列表', QVariant("")).split(',') # ["设备设施的不安全状态", "电气安全隐患", "管理缺失", "火灾安全隐患", "人员违反安全管理规定行为",  "应急管理隐患", "车辆安全隐患",  "食品安全隐患", "门岗管理隐患","环保隐患", "危险化学品安全隐患","八大危险作业管理隐患"]
-                        
+
         #######下拉列表#######
         quantity_combobox = QComboBox()    # 隐患级别
         quantity_combobox.addItems(hidden_class)
@@ -687,12 +728,12 @@ class Ui_MainWindow(object):
         checkebale_line = MyTextEdit(self.settings.value("被检查单位预置内容"     , QVariant("")))# "海宜洁源餐厨垃圾处置有限公司" 
         checkebale_line.editingFinished.connect(lambda x = checkebale_line , row = row ,column = 7 : self.get_text_frome_QTextEdit(x, row,column))
         self.hidden.setIndexWidget(self.model.index(row, 7), checkebale_line)
-        
+
         ##检查人员  
         yinhuanneirong_line = MyTextEdit(self.settings.value("检查人员预置内容"     , QVariant("")))
         yinhuanneirong_line.editingFinished.connect(lambda x = yinhuanneirong_line , row = row ,column = 8 : self.get_text_frome_QTextEdit(x, row,column))
         self.hidden.setIndexWidget(self.model.index(row, 8), yinhuanneirong_line)
-        
+
         ##检查地点  
         yinhuanneirong_line = MyTextEdit(self.settings.value("检查地点预置内容"     , QVariant("")))# "洁源公司餐厨项目现场"
         yinhuanneirong_line.editingFinished.connect(lambda x = yinhuanneirong_line , row = row ,column = 9 : self.get_text_frome_QTextEdit(x, row,column))
@@ -715,7 +756,7 @@ class Ui_MainWindow(object):
 
         ## 获取当日日期
         last_day = time.strftime('%Y-%m-%d', time.gmtime())
-        
+
         ## 在database新建空行（预设行的初始值）
         query = QSqlQuery()
         query.exec_(
@@ -724,7 +765,7 @@ class Ui_MainWindow(object):
             VALUES (?,?,?,?,?,?,?,?)
             """
         )
- 
+
         list_in_line = [row,last_day,'自查','设备设施的不安全状态','一般隐患（班组级）',self.settings.value("被检查单位预置内容"     , QVariant("")),self.settings.value("检查人员预置内容"     , QVariant("")),self.settings.value("检查地点预置内容"     , QVariant(""))]
         for i in (range(len(list_in_line))):  
             query.addBindValue("{}".format(list_in_line[i])) # 此因python 版本原因，不能使用f'{str}'语法兼容
@@ -764,7 +805,6 @@ class Ui_MainWindow(object):
         #连接数据库并存储单元格数据
         self.save_new_cell(current_text,row,column)
 
-
 #%%######### setupUi 配置及标题 ###### 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"\u5a01\u5a01\u5a01", None))                   # 威威威
@@ -778,8 +818,8 @@ class Ui_MainWindow(object):
         self.checkBox_tb    .setText(QCoreApplication.translate("MainWindow", u"\u901a\u62a5", None))                      # 通报
         self.checkBox_jcqktjb.setText(QCoreApplication.translate("MainWindow", u"\u68c0\u67e5\u60c5\u51b5\u7edf\u8ba1\u8868", None)) # 检查情况统计表
         self.checkBox_yhztz .setText(QCoreApplication.translate("MainWindow", u"隐患总台账", None))                         # 隐患总台账
+        self.checkBox_jcb   .setText(QCoreApplication.translate("MainWindow", u"检查表", None))                             # 检查表
         self.pushButton_dy .setText(QCoreApplication.translate("MainWindow" , u"打印机设置", None))                         # 打印机设置
-        
 
         self.groupBox       .setTitle(QCoreApplication.translate("MainWindow", u"\u8868\u683c\u64cd\u4f5c", None))         # 表格操作
         self.pushButton     .setText(QCoreApplication.translate("MainWindow", u"\u5237\u65b0", None))                      # 刷新
@@ -810,16 +850,15 @@ class Ui_MainWindow(object):
 #%% 删除功能
     def delete_selected_rows(self):
         query = QSqlQuery()
-        print('删除')
+        
         count_checkbox = len(self.get_check_data)
         for i in range(count_checkbox):
             row_id = self.get_check_data[i]
-
+            print(f'删除第：{row_id}行')
             comform = '''DELETE FROM hidden WHERE id = {} ''' .format(row_id)
             query.exec_(comform)
-            
             if not query.exec_():
-                print("Error saving data:", query.lastError().text())
+                print("删除错误:", query.lastError().text())
                 
         # self.refresh()
                             
@@ -895,6 +934,9 @@ class Ui_MainWindow(object):
 
         if 5 in self.get_check_data_output:    # 隐患总台账
             self.total()
+            
+        if 6 in self.get_check_data_output:    # 检查表
+            self.checklist()
 
         print( '当前生成按钮下勾选了：',self.get_check_data_output )
 
@@ -948,7 +990,7 @@ class Ui_MainWindow(object):
 
         retification_confirmation_number = output.connect_jieyuan_database() 
 
-        self.textBrowser.append('{}通报生成完毕！'.format(retification_confirmation_number))
+        self.textBrowser.append('{}'.format(retification_confirmation_number))
         # 打印 
         self.run_printer(output.output_file_path())
 
@@ -983,6 +1025,23 @@ class Ui_MainWindow(object):
 
         # 打印 
         self.run_printer(output.output_file_path())
+
+#%% 检查表
+    def checklist(self):
+        
+        model_path  = "{}".format(self.settings.value("检查表模板"            , QVariant("")))
+
+        output_dir  = "{}".format(self.settings.value("安全检查表生成地址"     , QVariant("")))
+
+        output = Write_safety_checklist(model_path,output_dir,self.get_check_data)
+
+        retification_confirmation_number = output.connect_jieyuan_database() 
+
+        self.textBrowser.append('{}通报生成完毕！'.format(retification_confirmation_number))
+        
+        # 打印 
+        self.run_printer(output.output_file_path())
+
 
 #%% '生成'按钮  其他附属功能
 
@@ -1066,7 +1125,7 @@ if __name__ == '__main__':
     # Ui_MainWindow().insert_database('retification_confirmation_number') # 为数据添加列
     fund_paddle_config = ''
 
-    app = QApplication([sys.argv])# ui主程序入口
+    app = QApplication(sys.argv)# ui主程序入口
     window = Ui_MainWindow()      # 创建主窗体对象并实例化
     window_yh = QMainWindow()     # 实例化QMainWindow
     window.setupUi(window_yh)     # 主窗体设置

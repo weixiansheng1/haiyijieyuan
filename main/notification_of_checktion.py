@@ -7,6 +7,7 @@
 import os
 import time,datetime
 import re
+import docxtpl
 from   docxtpl         import DocxTemplate,RichText         # pip install docxtpl
 from   PyQt5.QtSql     import QSqlQuery
 from   PyQt5.QtWidgets import QMessageBox
@@ -38,7 +39,14 @@ class Write_inspect_the_situation:
         select_column = 'unit_to_be_inspected,check_type,check_time,check_the_location,hidden_content,corrective_measures,responsible_punish,responsible_manager_punish,responsible_department_punish,corrective_deadline,hidden_type,correactive_situastion'
 
         # 读取word模板
-        template_path               = DocxTemplate(r"{}".format(self.file_path))    # 模板地址
+
+        try:
+            with open(self.file_path, 'r') :
+                template_path  = DocxTemplate(f"{self.file_path}")   # 模板地址
+        except FileNotFoundError:
+            return("读取模板文件失败，请检查模板文件地址")
+        
+            
         if len(self.select_row) ==1:
             select_row_ = self.select_row[0]
             exec_ = "SELECT {} FROM hidden WHERE Id = {} ".format(select_column,select_row_) 
@@ -90,10 +98,10 @@ class Write_inspect_the_situation:
         self.correactive_situastion = str_correactive_situastion                      # 整改情况
 
         # 数据拼接及整理
-        self.uncorrected_problem  = self.uncorrected_problem()                        # 未完成整改的隐患
-        self.check_haiyi_dict     = self.merge_check_str('海宜查',self.str_check_type,self.check_time)  # 检查类型:海宜查
-        self.check_jieyuan_dickt  = self.merge_check_str('自查'  ,self.str_check_type,self.check_time)  # 检查类型:自查
-        self.check_shouyun_dickt  = self.merge_check_str('查收运',self.str_check_type,self.check_time)  # 检查类型:查收运
+        self.uncorrected_problem    = self.uncorrected_problem()                        # 未完成整改的隐患
+        self.check_haiyi_dict       = self.merge_check_str('海宜查',self.str_check_type,self.check_time)  # 检查类型:海宜查
+        self.check_jieyuan_dickt    = self.merge_check_str('自查'  ,self.str_check_type,self.check_time)  # 检查类型:自查
+        self.check_shouyun_dickt    = self.merge_check_str('查收运',self.str_check_type,self.check_time)  # 检查类型:查收运
         self.check_xingzheng_dickt  = self.merge_check_str('查行政与应急',self.str_check_type,self.check_time)  # 检查类型:查行政与应急
 
 
@@ -115,7 +123,7 @@ class Write_inspect_the_situation:
         output_dir = r"{}".format(self.output_dir)
         self.output = os.path.join(output_dir, "关于珠海市海宜洁源餐厨垃圾处置有限公司{}安全生产专项工作检查情况的通报.docx ".format(now4))
         template_path.save(self.output)
-        return now4 
+        return f'{now4}通报生成完毕' 
 
     def output_file_path(self):
         return self.output
