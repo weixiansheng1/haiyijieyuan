@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Wed Jan  3 15:00:50 2024
 
@@ -17,7 +17,7 @@ from PyQt5.QtCore    import Qt, QRegularExpression, pyqtSignal, QRect, QCoreAppl
 from PyQt5.QtSql     import QSqlQuery,QSqlDatabase
 from PyQt5.QtGui     import QStandardItemModel, QStandardItem,QPixmap
 from collections     import defaultdict
-
+# TODO餐厨垃圾收运有两个即时整改
 
 # 引入本地项目代码
 from Notice_of_Rectification             import Write_notice_of_retification
@@ -62,16 +62,11 @@ class MyTextEdit(QTextEdit):
     editingFinished = pyqtSignal()
     def __init__(self, parent=None):
         super(MyTextEdit, self).__init__(parent)
-        # 连接 textChanged 信号到文本变化槽函数
-        self.textChanged.connect(self.on_text_changed)
-        # 创建定时器
-        self.timer = QTimer(self)
-        # 设置定时器超时时间（毫秒）
-        self.timer.setInterval(1000)
-        # 连接定时器到定时器超时槽函数
-        self.timer.timeout.connect(self.on_timer_timeout)
-        # 初始化文本变化标志
-        self.text_changed_flag = False
+        self.textChanged.connect(self.on_text_changed)  # 连接 textChanged 信号到文本变化槽函数
+        self.timer = QTimer(self)    # 创建定时器
+        self.timer.setInterval(1000)  # 设置定时器超时时间（毫秒）
+        self.timer.timeout.connect(self.on_timer_timeout) # 连接定时器到定时器超时槽函数
+        self.text_changed_flag = False   # 初始化文本变化标志
 
     def on_text_changed(self):
         # 设置文本变化标志为 True
