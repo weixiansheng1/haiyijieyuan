@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['C:\\Users\\Microsoft\\.spyder-py3\\temp.py', 'main\\main_ui_1_3.py', '..\\..\\标准化自评\\【5】教育培训\\5.1教育培训管理\\3-培训记录及评估\\1-日常培训记录\\一人一档内容编制\\洁源一人一档自动生成word-办公室电脑.py']
+recent_files = ['main\\main_ui_1_3.py']
 
 [main]
 version = 0.2.0

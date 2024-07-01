@@ -7,18 +7,9 @@ Created on Fri Apr 19 16:14:09 2024
 
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtCore    import Qt,QRect       ,QCoreApplication ,QSettings  , QVariant
-from PyQt5.QtWidgets import QWidget, QPushButton,QLabel           ,QFormLayout,QLineEdit,QDialog,QFileDialog,QTextEdit
+from PyQt5.QtCore    import Qt,QRect  ,QCoreApplication ,QSettings  , QVariant
+from PyQt5.QtWidgets import QWidget, QPushButton,QLabel ,QFormLayout,QLineEdit,QDialog,QFileDialog,QTextEdit
 
-
-
-################################################################################
-## Form generated from reading UI file 'hidden_setconfig_paddleiAmgKx.ui'
-##
-## Created by: Qt User Interface Compiler version 5.15.2
-##
-## WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
 
 class HiddenSetConfigWindow(QDialog):
 

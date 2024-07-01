@@ -7,7 +7,9 @@ Created on Wed Jan  3 15:00:50 2024
 import os
 import sys
 import time
-
+import datetime
+import pandas as pd
+import numpy as np
 from PyQt5.QtWidgets import( QApplication, QMainWindow, QVBoxLayout, QWidget   , QPushButton , QMessageBox    ,
                              QTextEdit   , QLabel     , QAction    , QGroupBox , QTextBrowser, QPlainTextEdit ,
                              QStatusBar  , QMenuBar   , QMenu      , QStyle    , QDateEdit   , QFileDialog    , 
@@ -30,7 +32,7 @@ from safety_checklist                    import Write_safety_checklist
 from setPrinter                          import MainApp
 
 
-
+dataf = None
 
 # -*- coding: utf-8 -*-
 
@@ -96,6 +98,7 @@ class CustomTextEdit(MyTextEdit):
 # -*- coding: utf-8 -*-
 
 class Ui_MainWindow(object):
+
     def setupUi(self, MainWindow):
         
         if not MainWindow.objectName():
@@ -125,7 +128,7 @@ class Ui_MainWindow(object):
         self.checkBox_zgtzs = QCheckBox(self.groupBox_sc)   # 整改通知书复选框
         self.checkBox_zgtzs.setObjectName(u"checkBox_zgtzs")
         self.checkBox_zgtzs.setGeometry(QRect(10, 50, 81, 16))
-        #self.checkBox_zgtzs.setChecked(True)
+
 
         self.checkBox_zgqrd = QCheckBox(self.groupBox_sc)  # 整改确认单复选框
         self.checkBox_zgqrd.setObjectName(u"checkBox_zgqrd")
@@ -135,22 +138,19 @@ class Ui_MainWindow(object):
         self.checkBox_tb = QCheckBox(self.groupBox_sc)     # 通报复选框
         self.checkBox_tb.setObjectName(u"checkBox_tb")
         self.checkBox_tb.setGeometry(QRect(10, 90, 71, 16))
-        #self.checkBox_tb.setChecked(True)
+
 
         self.checkBox_jcqktjb = QCheckBox(self.groupBox_sc) # 检查情况统计表复选框
         self.checkBox_jcqktjb.setObjectName(u"checkBox_jcqktjb")
         self.checkBox_jcqktjb.setGeometry(QRect(10, 110, 111, 16))
-        #self.checkBox_jcqktjb.setChecked(True)
 
         self.checkBox_yhztz = QCheckBox(self.groupBox_sc)   # 隐患总台账复选框
         self.checkBox_yhztz.setObjectName(u"checkBox_yhztz")
         self.checkBox_yhztz.setGeometry(QRect(10, 130, 111, 16))
-        #self.checkBox_jcqktjb.setChecked(True)
         
         self.checkBox_jcb = QCheckBox(self.groupBox_sc)   # 检查表复选框
         self.checkBox_jcb.setObjectName(u"checkBox_jcb")
         self.checkBox_jcb.setGeometry(QRect(10, 150, 111, 16))
-        #self.checkBox_jcqktjb.setChecked(True)
 
         self.enable_radio_printer = QRadioButton(u"生成后自动打印", self.groupBox_sc) # 生成后自动打印
         self.enable_radio_printer.setObjectName(u"enable_radio_printer")
@@ -226,6 +226,20 @@ class Ui_MainWindow(object):
 
         MainWindow.setStatusBar(self.statusbar) # 状态栏
 
+
+        self.groupBox_3 = QGroupBox(self.centralwidget)
+        self.groupBox_3.setObjectName(u"导入数据")
+        self.groupBox_3.setGeometry(QRect(1630, 660, 181, 291))
+
+        self.pushButton_from_zc = QPushButton(self.groupBox_3)  # 从自查统计表
+        self.pushButton_from_zc.setObjectName(u"pushButton_from_zc")
+        self.pushButton_from_zc.setGeometry(QRect(0, 20, 81, 30))
+        
+        self.pushButton_from_zcqu = QPushButton(self.groupBox_3)  # 从自查统计表确认保存
+        self.pushButton_from_zcqu.setObjectName(u"pushButton_from_zcqu")
+        self.pushButton_from_zcqu.setGeometry(QRect(90, 20, 61, 30))
+
+
         ######### 初始化隐患配置面板 ##########
         self.HiddenConfigPaddld()
 
@@ -254,6 +268,7 @@ class Ui_MainWindow(object):
         self.aFileNew.setIcon(style.standardIcon(QStyle.SP_FileIcon)) # 添加一个图标
         self.aFileNew.setShortcut(Qt.CTRL + Qt.Key_N)                 # 添加快捷键
         self.aFileNew.triggered.connect(self.onFileNew)
+        
         #打开文件
         self.aFileOpen = QAction(MainWindow)
         self.aFileOpen.setObjectName(u"actionhao_2")
@@ -298,7 +313,6 @@ class Ui_MainWindow(object):
         # 触发器
         self.select_allcheckbox = ToggleState(True)  # checkbox触发器
 
-
         # 初始化勾选框id值
         self.get_check_data        = []        # 用于 self.line_get_check() 函数
         self.get_check_data_output = []        # 用于获取生成中的checkbox状态   [1,2,3,4]：对应-> [整改通知书，整改确认单，通报，检查情况统计表]
@@ -330,6 +344,13 @@ class Ui_MainWindow(object):
         self.checkBox_yhztz.stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 5: self.get_output_checkbox(data,number))  # 隐患总台账
         self.checkBox_jcb  .stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 6: self.get_output_checkbox(data,number))  # 检查表
         
+        ##### 导入 #####
+        self.pushButton_from_zc.clicked.connect(self.load_from_selfcheck)   # 从自查统计表导入
+        self.pushButton_from_zcqu.clicked.connect(self.save_zicha_data)     # 从自查统计表导入 确认保存
+
+
+
+
 #%% 初始化tableview
         self.set_database_and_biuldtable()                                       # 建立表格设置表头及连接数据库
         self.hidden.setModel(self.load_data_to_model())                          # 放入standermodel
@@ -337,6 +358,8 @@ class Ui_MainWindow(object):
         self.hidden.customContextMenuRequested.connect(self.show_context_menu)
         self.set_row_column()                                                    # 设置列宽列高
         self.set_checkbox_in_lie(False)                                          # 在每行末尾添加复选框
+#%% 初始化其他数据
+        self.zicha_data =  {'A': [None, None, None], 'B': [None, None, None]}
 
 #%% 菜单栏动作槽
     def msgCritical(self, strInfo):
@@ -500,30 +523,45 @@ class Ui_MainWindow(object):
         menu.exec_(self.hidden.viewport().mapToGlobal(pos))
 
     def insert_row(self):
-        
         row = self.hidden.currentIndex().row() 
         self.model.insertRow(row)
         query = QSqlQuery("SELECT id FROM hidden")
-        hidden_count = [] 
+        hidden_count = []
         
-        while query.next():   # 检查是否有结果，并获取计数值
+        while query.next():
             hidden_count.append(query.value(0))
-            
+        
         hidden_count.sort(reverse=True) # 将列表逆序，避免插入错误
-
-        for old_id in hidden_count:
-            if old_id >= row:
-                #new_id =old_id +1
-                query = QSqlQuery(f"UPDATE hidden SET id={old_id+1} WHERE id ={old_id}")
-               # print('old_id:' ,old_id,'new_id', new_id,'row:',row)
-            else:
-                break
-            
-        self.row_control(row)
-
+        
         if not query.exec_():
             print("保存插入行错:", query.lastError().text())
-
+            
+        
+        t = time.time()
+        query = QSqlQuery()
+        query.prepare("UPDATE hidden SET id=? WHERE id =?")
+        
+        # update_query = f' UPDATE hidden SET {column_name}=? WHERE id =? '
+        # query.exec_(str(update_query))
+        # query.addBindValue(data)
+        # query.addBindValue(row)
+        
+        new_id = [ old_id+1 for old_id in hidden_count   if old_id >= row]
+        
+        query.addBindValue(new_id)
+        
+        old_id = [ old_id for old_id in hidden_count   if old_id >= row]
+        query.addBindValue(old_id)
+        
+        if not query.execBatch():
+            print(query.lastError())
+        e = time.time()-t
+        print(hidden_count,new_id)
+        # lll = [QSqlQuery(f"UPDATE hidden SET id={old_id+1} WHERE id ={old_id}")  for old_id in hidden_count   if old_id >= row]
+        
+        
+        print('耗时：',e)
+        self.row_control(row)
 
 #%% 刷新按钮 
     def refresh(self):
@@ -611,9 +649,10 @@ class Ui_MainWindow(object):
                 print("Error saving data:", query.lastError().text())
 
 
-#%%      刷新id
+#%% 刷新id
     def refresh_id(self):
-        query = QSqlQuery("SELECT id FROM hidden")
+        query = QSqlQuery()
+        query.exec_("SELECT id FROM hidden")
 
         hidden_count = [] 
         while query.next():   # 检查是否有结果，并获取计数值
@@ -622,9 +661,9 @@ class Ui_MainWindow(object):
             # print("new_id:",new_id,"old_id:",old_id)
             # 已优化：如果旧id不按，不必从头，可用异步处理
             if new_id != old_id:
-                #query = QSqlQuery(f"UPDATE hidden SET id={new_id} WHERE id ={old_id}") 
-            
-                self.save_new_cell(new_id, old_id, 0)
+                query.exec_(f"UPDATE hidden SET id={new_id} WHERE id ={old_id}")
+                
+                # self.save_new_cell(new_id, old_id, 0)
 
 #%% 弹簧器
     def selec_checkbox_AllorNo(self):
@@ -762,6 +801,7 @@ class Ui_MainWindow(object):
         )
 
         list_in_line = [row,last_day,'自查','设备设施的不安全状态','一般隐患（班组级）',self.settings.value("被检查单位预置内容"     , QVariant("")),self.settings.value("检查人员预置内容"     , QVariant("")),self.settings.value("检查地点预置内容"     , QVariant(""))]
+        
         for i in (range(len(list_in_line))):  
             query.addBindValue("{}".format(list_in_line[i])) # 此因python 版本原因，不能使用f'{str}'语法兼容
         if not query.exec_():
@@ -826,6 +866,10 @@ class Ui_MainWindow(object):
         self.groupBox_2     .setTitle(QCoreApplication.translate("MainWindow", u"\u5feb\u901f\u526a\u5207\u677f", None))   # 快速剪切板
         self.label          .setText(QCoreApplication.translate("MainWindow", u"\u88ab\u68c0\u67e5\u5355\u4f4d", None))    # 被检查单位
 
+        self.groupBox_3     .setTitle(QCoreApplication.translate("MainWindow", u"导入数据", None))   
+        self.pushButton_from_zc   .setText(QCoreApplication.translate("MainWindow", u"从自查统计表", None)) 
+        self.pushButton_from_zcqu.setText(QCoreApplication.translate("MainWindow", u"确认保存", None)) 
+                      
         # 快速剪切板
         self.plainTextEdit  .setPlainText(QCoreApplication.translate("MainWindow",  self.settings.value("快速剪切板预置内容"     , QVariant("")), None))
 
@@ -1112,13 +1156,106 @@ class Ui_MainWindow(object):
                 self.show_warning_message("勾选中含有不同的检查类型，请重新勾选！")  # 显示警告信息
             else:                                                                 # 调用整改确认单
                 self.confirm()
+    
+#%% 从自查统计表导入
+    def load_from_selfcheck(self):     # 打开文件
+        path, _ = QFileDialog.getOpenFileName(window_yh, '打开文件', '')
+        if path:
+            try:
+                global data  # TODO待取消全局变量
+                data= pd.read_excel(path,sheet_name=0,header=1)  # 读取自查统计表的excel   文档参考 https://gairuo.com/p/pandas-read-excel
+                data['检查时间'] = data['检查时间'].dt.strftime('%Y-%m-%d')   # 将时间戳转换为年月日
+                data['检查时间'] = data['检查时间'].fillna(method='pad')      # 把当前值广播到后边的缺失值'
+                data['序号'] = data['序号'] .astype(str)
+                data['序号'] = data['序号'].replace(regex=[r'\d+','nan'], value=np.nan) #regex=True
+                data['序号'] = data['序号'].fillna(method='pad')              # 把当前值广播到后边的缺失值'
+                data.pop('图片')                                              # 删除
+                data= data.drop(0,axis=0)                                     # 删除第一行
+                data.dropna(axis=0,inplace=True,thresh=3)                     # 删除小于3个nan的非空行
+                data = data.reset_index(drop=True)                            # 重置索引
+                data.rename(columns={'内部扣分情况':'责任人'}, inplace=True )  # 重命名列名
+                data.rename(columns={'Unnamed: 7':'责任管理人员'}, inplace=True ) 
+                data.rename(columns={'Unnamed: 8':'责任部门'}, inplace=True ) 
+                global data_split_zzhenggai
+                data_split_zzhenggai = data['整改要求'].str.split("（整改期限：",n=-1,expand=True)
+
+                global data_split_zzhengga
+                data_split_zzhengga  = data_split_zzhenggai[1].str.split("）",expand=True)
+                data_split_zzhenggai.columns = ['整改要求','整改期限']
+
+                if data_split_zzhengga[0].isnull().values.any():
+                    self.show_warning_message('整改要求中存在数据未填写整改期限，请检查')
+                else:
+                    # data_split_zzhenggai['整改期限'] = data_split_zzhengga[0]
+                    data['整改要求'] = data_split_zzhenggai['整改要求']
+                    data['整改期限'] = data_split_zzhengga[0]
+                    self.zicha_data = data 
+                    # 在standaritem中显示 
+                    row = self.model.rowCount()
+                    for i, j in data.iterrows(): # i是int,j是series
+                    
+                        its =[ QStandardItem(f"{row}"),
+                               QStandardItem("{}".format(j['检查时间'])),
+                               QStandardItem("{}".format(j['序号'])),
+                               QStandardItem("{}".format(j['存在问题'])),
+                               QStandardItem("{}".format(None)),
+                               QStandardItem("{}".format(None)),
+                               QStandardItem("{}".format(None)),
+                               QStandardItem("{}".format(self.settings.value("被检查单位预置内容" , QVariant("")))),
+                               QStandardItem("{}".format(self.settings.value("检查人员预置内容" , QVariant("")))),
+                               QStandardItem("{}".format(self.settings.value("检查地点预置内容" , QVariant("")))),
+                               QStandardItem("{}".format(j['责任人/责任单位'])),
+                               QStandardItem("{}".format(j['责任管理人员'])), # TODO 考虑是否将责任人和扣分单独拆分
+                               QStandardItem("{}".format(j['责任部门'])),
+                               QStandardItem("{}".format(j['整改要求'])),
+                               QStandardItem("{}".format(j['整改期限'])),
+                               ]
+                                             
+                        self.model.appendRow(its)
+                        row +=1
+
+                # 批量导入数据库
+            except Exception as e:
+                self.show_warning_message(str(e))
+                print(str(e))
+
+    def save_zicha_data(self):
+        
+        if self.zicha_data.isnull().all().all():
+            self.show_warning_message('未导入自查数据，请导入')
+        else:
+            query = QSqlQuery()
+            # 获取最新插入的记录的id
+            query.exec_("SELECT MAX(id) FROM hidden")
+            if query.next():
+                row =query.value(0)
+    
+            ## 在database新建空行（预设行的初始值）
+            for i, j in self.zicha_data.iterrows(): # i是int,j是series
+                query = QSqlQuery()
+
+                query.exec_(
+                    """
+                    INSERT INTO hidden (id,check_time, check_type,hidden_content, hidden_type, hidden_level,unit_to_be_inspected,inspector,check_the_location,'responsible_punish', 'responsible_manager_punish','responsible_department_punish','corrective_measures','corrective_deadline')
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    """
+                ) 
+                print(f'{row}')
+                list_in_line = [row,j['检查时间'],j['序号'],j['存在问题'],None,None,self.settings.value("被检查单位预置内容" , QVariant("")),self.settings.value("检查人员预置内容" , QVariant("")),self.settings.value("检查地点预置内容", QVariant("")),j['责任人/责任单位'],j['责任管理人员'],j['责任部门'],j['整改要求'],j['整改期限']]
+                
+                for i in (range(len(list_in_line))):  
+                    query.addBindValue("{}".format(list_in_line[i])) # 此因python 版本原因，不能使用f'{str}'语法兼容
+                row +=1
+                
+                if not query.exec_():
+                    print("存储数据错误:", query.lastError().text())
+
 
 #%%主程序入口
 if __name__ == '__main__':
     # 新建数据库
     # 通过QSqlDatabase建立sqlite数据库
     # Ui_MainWindow().insert_database('retification_confirmation_number') # 为数据添加列
-    fund_paddle_config = ''
 
     app = QApplication(sys.argv)# ui主程序入口
     window = Ui_MainWindow()      # 创建主窗体对象并实例化
