@@ -7,15 +7,14 @@ Created on Wed Jan  3 15:00:50 2024
 import os
 import sys
 import time
-import datetime
 import pandas as pd
 import numpy as np
 from PyQt5.QtWidgets import( QApplication, QMainWindow, QVBoxLayout, QWidget   , QPushButton , QMessageBox    ,
                              QTextEdit   , QLabel     , QAction    , QGroupBox , QTextBrowser, QPlainTextEdit ,
                              QStatusBar  , QMenuBar   , QMenu      , QStyle    , QDateEdit   , QFileDialog    , 
-                             QRadioButton, QCheckBox  ,QTableView  , QComboBox , QMenu )
+                             QRadioButton, QCheckBox  ,QTableView  , QComboBox  )
 
-from PyQt5.QtCore    import Qt, QRegularExpression, pyqtSignal, QRect, QCoreApplication, QMetaObject, QDate, QTimer,QSettings,QVariant,QModelIndex
+from PyQt5.QtCore    import Qt, QRegularExpression, pyqtSignal, QRect, QCoreApplication, QMetaObject, QDate, QTimer,QSettings,QVariant
 from PyQt5.QtSql     import QSqlQuery,QSqlDatabase
 from PyQt5.QtGui     import QStandardItemModel, QStandardItem,QPixmap
 from collections     import defaultdict
@@ -32,7 +31,6 @@ from safety_checklist                    import Write_safety_checklist
 from setPrinter                          import MainApp
 
 
-dataf = None
 
 # -*- coding: utf-8 -*-
 
@@ -43,7 +41,7 @@ class ToggleState:
 
     def toggle(self):
         if self.state:
-            self.state = False 
+            self.state = False
         else:
             self.state = True
         return self.state
@@ -119,7 +117,7 @@ class Ui_MainWindow(object):
         # 生成
         self.groupBox_sc = QGroupBox(self.centralwidget)
         self.groupBox_sc.setObjectName(u"groupBox_sc")
-        self.groupBox_sc.setGeometry(QRect(1730, 30, 120, 211))
+        self.groupBox_sc.setGeometry(QRect(1730, 30, 175, 211))
 
         self.pushButton_sc = QPushButton(self.groupBox_sc)  # 生成按钮
         self.pushButton_sc.setObjectName(u"pushButton_sc")
@@ -148,9 +146,15 @@ class Ui_MainWindow(object):
         self.checkBox_yhztz.setObjectName(u"checkBox_yhztz")
         self.checkBox_yhztz.setGeometry(QRect(10, 130, 111, 16))
         
-        self.checkBox_jcb = QCheckBox(self.groupBox_sc)   # 检查表复选框
+        self.checkBox_jcb = QCheckBox(self.groupBox_sc)     # 检查表复选框
         self.checkBox_jcb.setObjectName(u"checkBox_jcb")
         self.checkBox_jcb.setGeometry(QRect(10, 150, 111, 16))
+        
+        
+        self.checkBox_lxd = QCheckBox(self.groupBox_sc)     # 工程维修联系单复选框
+        self.checkBox_lxd.setObjectName(u"checkBox_lxd")
+        self.checkBox_lxd.setGeometry(QRect(90, 50, 81, 16))
+        
 
         self.enable_radio_printer = QRadioButton(u"生成后自动打印", self.groupBox_sc) # 生成后自动打印
         self.enable_radio_printer.setObjectName(u"enable_radio_printer")
@@ -343,12 +347,11 @@ class Ui_MainWindow(object):
         self.checkBox_jcqktjb.stateChanged.connect(lambda data = self.checkBox_jcqktjb , number = 4: self.get_output_checkbox(data,number))  # 检查情况统计表
         self.checkBox_yhztz.stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 5: self.get_output_checkbox(data,number))  # 隐患总台账
         self.checkBox_jcb  .stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 6: self.get_output_checkbox(data,number))  # 检查表
+        self.checkBox_lxd  .stateChanged.connect(  lambda data = self.checkBox_jcqktjb , number = 7: self.get_output_checkbox(data,number))  # 工程维修联系单
         
         ##### 导入 #####
-        self.pushButton_from_zc.clicked.connect(self.load_from_selfcheck)   # 从自查统计表导入
-        self.pushButton_from_zcqu.clicked.connect(self.save_zicha_data)     # 从自查统计表导入 确认保存
-
-
+        self.pushButton_from_zc.clicked  .connect(self.load_from_selfcheck)   # 从自查统计表导入
+        self.pushButton_from_zcqu.clicked.connect(self.save_zicha_data)       # 从自查统计表导入 确认保存
 
 
 #%% 初始化tableview
@@ -481,7 +484,7 @@ class Ui_MainWindow(object):
     def set_row_column(self):
         # 设置列宽
         _header = self.hidden.horizontalHeader()                # 获取水平表头对象
-        #_header.setMinimumHeight(30)      
+        #_header.setMinimumHeight(30)
 
         # 设置列宽度     [0, 1, 2 ,  3,  4 , 5 , 6 , 7 , 8 , 9 ,10 , 11, 12,13 ,14 ,15 ,16 ,17 ]
         _column_wight = [28,100,85,200,170,170,130,140,140,140,130,130,130,200,100,100,100,100,100]
@@ -489,9 +492,9 @@ class Ui_MainWindow(object):
             _header.resizeSection(i,_column_wight[i] )          # 设置列宽度
 
         # 设置所有tableview默认行高
-        self.hidden.verticalHeader().setDefaultSectionSize(100) 
+        self.hidden.verticalHeader().setDefaultSectionSize(100)
 
-#%%在每行末尾添加复选框 
+#%%在每行末尾添加复选框
     def set_checkbox_in_lie(self,select = False):
         for row in range(self.model.rowCount()):
             self.set_checkbox(select, row)
@@ -854,6 +857,7 @@ class Ui_MainWindow(object):
         self.checkBox_jcqktjb.setText(QCoreApplication.translate("MainWindow", u"\u68c0\u67e5\u60c5\u51b5\u7edf\u8ba1\u8868", None)) # 检查情况统计表
         self.checkBox_yhztz .setText(QCoreApplication.translate("MainWindow", u"隐患总台账", None))                         # 隐患总台账
         self.checkBox_jcb   .setText(QCoreApplication.translate("MainWindow", u"检查表", None))                             # 检查表
+        self.checkBox_lxd   .setText(QCoreApplication.translate("MainWindow", u"维修联系单", None))                             # 工程维修联系单
         self.pushButton_dy .setText(QCoreApplication.translate("MainWindow" , u"打印机设置", None))                         # 打印机设置
 
         self.groupBox       .setTitle(QCoreApplication.translate("MainWindow", u"\u8868\u683c\u64cd\u4f5c", None))         # 表格操作
@@ -938,9 +942,9 @@ class Ui_MainWindow(object):
 
 #%% 初始化隐患设置
     def HiddenConfigPaddld(self):
-        if not os.path.exists( 'settings.ini'):
+        if not os.path.exists('settings.ini'):
             # 创建默认配置文件
-            settings = QSettings( 'settings.ini', QSettings.IniFormat)
+            settings = QSettings('settings.ini', QSettings.IniFormat)
             settings.setValue("text_box", "default text")
             
         self.settings = QSettings('settings.ini', QSettings.IniFormat)
@@ -949,12 +953,14 @@ class Ui_MainWindow(object):
 #%%生成 
     # 获取生成中的checkbox
     def get_output_checkbox(self, data, number):
-         if data == 2:
-             self.get_check_data_output.append(number)
-         elif data == 0:
-             self.get_check_data_output.remove(number)
-
-         print("生成框中当前选中了：",self.get_check_data_output) # [1,2,3,4]：对应-> [整改通知书，整改确认单，通报，检查情况统计表]
+        get_shengcheng_name = ['整改通知书','整改确认单','通报','检查情况统计表','隐患总台账','检查表','工程维修联系单']
+        if data == 2:
+            self.get_check_data_output.append(number)
+            get_name = ';  '.join([get_shengcheng_name[i-1] for i in self.get_check_data_output])
+        elif data == 0:
+            self.get_check_data_output.remove(number)
+            get_name = '当前没选'
+        print("生成框中当前选中了：",get_name) 
 
 
     # 生成按钮信号槽 
@@ -976,8 +982,13 @@ class Ui_MainWindow(object):
             
         if 6 in self.get_check_data_output:    # 检查表
             self.checklist()
-
-        print( '当前生成按钮下勾选了：',self.get_check_data_output )
+            
+        if 7 in self.get_check_data_output:    # 工程维修联系单
+            self.engineering_repair_sheet()
+        get_shengcheng_name = ['整改通知书','整改确认单','通报','检查情况统计表','隐患总台账','检查表','工程维修联系单']
+        get_name = ';  '.join([get_shengcheng_name[i-1] for i in self.get_check_data_output])
+        
+        print( '当前生成按钮下勾选了：',self.get_check_data_output, get_name) # int(self.get_check_data_output+1)
 
 
 #%% 控制整改通知书  
@@ -1042,7 +1053,7 @@ class Ui_MainWindow(object):
 
         output.function()
 
-        now4 = time.strftime("%Y年%m月"      ,time.localtime(time.time())).replace('年0','年')
+        now4 = time.strftime("%Y年%m月"  ,time.localtime(time.time())).replace('年0','年')
 
         self.textBrowser.append('%s检查情况统计表生成完毕'%now4)
 
@@ -1080,7 +1091,22 @@ class Ui_MainWindow(object):
         
         # 打印 
         self.run_printer(output.output_file_path())
-
+#%% 工程维修联系单
+    def engineering_repair_sheet(self): # TODO 待增加设置中工程维修联系单
+        from engin_repair_sheet import Write_engineering_repair_sheet
+        
+        output_dir  = "{}".format(self.settings.value("工程维修联系单生成地址" , QVariant("")))
+        
+        output = Write_engineering_repair_sheet(output_dir,self.get_check_data)
+        
+        output.function()
+        
+        now5 = time.strftime("%Y年%m月%d日"  ,time.localtime(time.time())).replace('年0','年').replace('月0','月')
+        
+        self.textBrowser.append('%s工程维修联系单生成完毕'%now5)
+        
+        # 打印 
+        self.run_printer(output.output_file_path())
 
 #%% '生成'按钮  其他附属功能
 
@@ -1176,6 +1202,10 @@ class Ui_MainWindow(object):
                 data.rename(columns={'内部扣分情况':'责任人'}, inplace=True )  # 重命名列名
                 data.rename(columns={'Unnamed: 7':'责任管理人员'}, inplace=True ) 
                 data.rename(columns={'Unnamed: 8':'责任部门'}, inplace=True ) 
+                data['序号'] = data['序号'].str.replace('生产安全隐患问题','自查')
+                data['序号'] = data['序号'].str.replace('收运安全隐患问题','查收运')
+                data['序号'] = data['序号'].str.replace('综合、应急隐患问题','查行政与应急')
+                
                 global data_split_zzhenggai
                 data_split_zzhenggai = data['整改要求'].str.split("（整改期限：",n=-1,expand=True)
 
@@ -1193,7 +1223,7 @@ class Ui_MainWindow(object):
                     # 在standaritem中显示 
                     row = self.model.rowCount()
                     for i, j in data.iterrows(): # i是int,j是series
-                    
+
                         its =[ QStandardItem(f"{row}"),
                                QStandardItem("{}".format(j['检查时间'])),
                                QStandardItem("{}".format(j['序号'])),
@@ -1210,7 +1240,7 @@ class Ui_MainWindow(object):
                                QStandardItem("{}".format(j['整改要求'])),
                                QStandardItem("{}".format(j['整改期限'])),
                                ]
-                                             
+
                         self.model.appendRow(its)
                         row +=1
 

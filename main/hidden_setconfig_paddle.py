@@ -36,7 +36,7 @@ class HiddenSetConfigWindow(QDialog):
         
         self.pushButton = QPushButton(self)
         self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setGeometry(QRect(600, 520, 151, 23))
+        self.pushButton.setGeometry(QRect(600, 620, 151, 23))
         self.pushButton.setText('新建今年数据库')
 
 
@@ -183,7 +183,25 @@ class HiddenSetConfigWindow(QDialog):
         self.pushButton_cl.setObjectName(u"pushButton_cl")
         self.pushButton_cl.setGeometry(QRect(1292, 175, 55, 20))
         self.pushButton_cl.setText(QCoreApplication.translate("Form", u"选择", None))# 保存
+# =============================================================================
+#         # 工程维修联系单生成地址
+# =============================================================================
+        self.label_wxlxd = QLabel(self.formLayoutWidget)
+        self.label_wxlxd.setObjectName(u"label_wxlxd")
+        self.label_wxlxd.setText(QCoreApplication.translate("Form", u"工程维修联系单生成地址", None))# 隐患总台账生成地址
         
+        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_wxlxd)
+
+        self.lineEdit_wxlxd = QLineEdit(self.formLayoutWidget)
+        self.lineEdit_wxlxd.setObjectName(u"lineEdit_wxlxd")
+
+        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.lineEdit_wxlxd)
+
+        # 选择
+        self.pushButton_wxlxd = QPushButton(self)
+        self.pushButton_wxlxd.setObjectName(u"pushButton_wxlxd")
+        self.pushButton_wxlxd.setGeometry(QRect(1292, 203, 55, 20))
+        self.pushButton_wxlxd.setText(QCoreApplication.translate("Form", u"选择", None))# 保存
 
 # =============================================================================
 #         # 隐患整改通知书模板
@@ -193,17 +211,17 @@ class HiddenSetConfigWindow(QDialog):
         self.label_13.setAlignment(Qt.AlignCenter)
         self.label_13.setText(QCoreApplication.translate("Form", u"\u9690\u60a3\u6574\u6539\u901a\u77e5\u4e66\u6a21\u677f", None))
         
-        self.formLayout.setWidget(7, QFormLayout.LabelRole, self.label_13)
+        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_13)
 
         self.lineEdit_13 = QLineEdit(self.formLayoutWidget)
         self.lineEdit_13.setObjectName(u"lineEdit_13")
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.lineEdit_13)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.lineEdit_13)
 
         # 选择
         self.pushButton_9 = QPushButton(self)
         self.pushButton_9.setObjectName(u"pushButton_9")
-        self.pushButton_9.setGeometry(QRect(1292, 202, 55, 20))
+        self.pushButton_9.setGeometry(QRect(1292, 228, 55, 20))
         self.pushButton_9.setText(QCoreApplication.translate("Form", u"选择", None))# 保存
 # =============================================================================
 #         # 隐患整改确认单模板
@@ -212,18 +230,18 @@ class HiddenSetConfigWindow(QDialog):
         self.label_14.setObjectName(u"label_14")
         self.label_14.setText(QCoreApplication.translate("Form", u"\u9690\u60a3\u6574\u6539\u786e\u8ba4\u5355\u6a21\u677f", None))
         
-        self.formLayout.setWidget(8, QFormLayout.LabelRole, self.label_14)
+        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_14)
 
         self.lineEdit_14 = QLineEdit(self.formLayoutWidget)
         self.lineEdit_14.setObjectName(u"lineEdit_14")
 
 
-        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.lineEdit_14)
+        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.lineEdit_14)
         
         # 选择
         self.pushButton_10 = QPushButton(self)
         self.pushButton_10.setObjectName(u"pushButton_10")
-        self.pushButton_10.setGeometry(QRect(1292, 227, 55, 20))
+        self.pushButton_10.setGeometry(QRect(1292, 254, 55, 20))
         self.pushButton_10.setText(QCoreApplication.translate("Form", u"选择", None))# 保存
         
 # =============================================================================
@@ -233,17 +251,17 @@ class HiddenSetConfigWindow(QDialog):
         self.label_16.setObjectName(u"label_16")
         self.label_16.setText(QCoreApplication.translate("Form", u"\u6bcf\u6708\u901a\u62a5\u6a21\u677f", None))
         
-        self.formLayout.setWidget(9, QFormLayout.LabelRole, self.label_16)
+        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_16)
 
         self.lineEdit_16 = QLineEdit(self.formLayoutWidget)
         self.lineEdit_16.setObjectName(u"lineEdit_16")
 
-        self.formLayout.setWidget(9, QFormLayout.FieldRole, self.lineEdit_16)
+        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.lineEdit_16)
 
         # 选择
         self.pushButton_11 = QPushButton(self)
         self.pushButton_11.setObjectName(u"pushButton_11")
-        self.pushButton_11.setGeometry(QRect(1292, 253, 55, 20))
+        self.pushButton_11.setGeometry(QRect(1292, 280, 55, 20))
         self.pushButton_11.setText(QCoreApplication.translate("Form", u"选择", None))# 保存
         
 # =============================================================================
@@ -253,17 +271,17 @@ class HiddenSetConfigWindow(QDialog):
         self.label_clm.setObjectName(u"label_clm")
         self.label_clm.setText(QCoreApplication.translate("Form", u"检查表模板", None))
         
-        self.formLayout.setWidget(10, QFormLayout.LabelRole, self.label_clm)
+        self.formLayout.setWidget(11, QFormLayout.LabelRole, self.label_clm)
 
         self.lineEdit_clm = QLineEdit(self.formLayoutWidget)
         self.lineEdit_clm.setObjectName(u"lineEdit_clm")
 
-        self.formLayout.setWidget(10, QFormLayout.FieldRole, self.lineEdit_clm)
+        self.formLayout.setWidget(11, QFormLayout.FieldRole, self.lineEdit_clm)
 
         # 选择
         self.pushButton_clm = QPushButton(self)
         self.pushButton_clm.setObjectName(u"pushButton_clm")
-        self.pushButton_clm.setGeometry(QRect(1292, 280, 55, 20))
+        self.pushButton_clm.setGeometry(QRect(1292, 306, 55, 20))
         self.pushButton_clm.setText(QCoreApplication.translate("Form", u"选择", None))# 保存
 
 # =============================================================================
@@ -271,14 +289,15 @@ class HiddenSetConfigWindow(QDialog):
 # =============================================================================
         self.pushButton_2 = QPushButton(self)
         self.pushButton_2.setObjectName(u"pushButton_2")
-        self.pushButton_2.setGeometry(QRect(830, 520, 75, 23))
+        self.pushButton_2.setGeometry(QRect(830, 620, 75, 23))
         self.pushButton_2.setText(QCoreApplication.translate("Form", u"\u4fdd\u5b58", None))# 保存
+        
         
         
 ###############################################################################
         self.formLayoutWidget_2 = QWidget(self)
         self.formLayoutWidget_2.setObjectName(u"formLayoutWidget_2")
-        self.formLayoutWidget_2.setGeometry(QRect(10, 320, 1299, 240))
+        self.formLayoutWidget_2.setGeometry(QRect(10, 360, 1299, 240))
         
         self.formLayout_2 = QFormLayout(self.formLayoutWidget_2)
         
@@ -397,8 +416,10 @@ class HiddenSetConfigWindow(QDialog):
         # 加载配置
         self.load_settings()
 
-        #### 信号槽 ####
-        # lineEdit
+# =============================================================================
+#         #### 信号槽 ####
+# =============================================================================
+        # lineEdit保存到配置
         self.lineEdit   .textChanged.connect(lambda data ,menu = '数据库地址'           : self.save_settings(menu, data))
         self.lineEdit_2 .textChanged.connect(lambda data ,menu = '隐患整改通知书生成地址': self.save_settings(menu, data))
         self.lineEdit_3 .textChanged.connect(lambda data ,menu = '隐患整改确认单生成地址': self.save_settings(menu, data))
@@ -406,7 +427,8 @@ class HiddenSetConfigWindow(QDialog):
         self.lineEdit_5 .textChanged.connect(lambda data ,menu = '检查情况统计表生成地址': self.save_settings(menu, data))
         self.lineEdit_6 .textChanged.connect(lambda data ,menu = '隐患总台账生成地址'    : self.save_settings(menu, data))
         self.lineEdit_cl.textChanged.connect(lambda data, menu = "安全检查表生成地址"    : self.save_settings(menu, data))
-      
+        self.lineEdit_wxlxd.textChanged.connect(lambda data, menu = "工程维修联系单生成地址": self.save_settings(menu, data))
+        
         self.lineEdit_13.textChanged.connect(lambda data ,menu = '隐患整改通知书模板'    : self.save_settings(menu, data))
         self.lineEdit_14.textChanged.connect(lambda data ,menu = '隐患整改确认单模板'    : self.save_settings(menu, data))
         self.lineEdit_16.textChanged.connect(lambda data ,menu = '每月通报模板'          : self.save_settings(menu, data))
@@ -420,7 +442,7 @@ class HiddenSetConfigWindow(QDialog):
         self.lineEdit_12.textChanged.connect(lambda data ,menu = '检查地点预置内容'      : self.save_settings(menu, data))
         self.text_edit  .textChanged.connect(lambda menu       = '快速剪切板预置内容'    : self.onTextChanged(menu) )
         
-        # ‘保存’
+        # 每行的‘选择’按钮
         self.pushButton_2.clicked.connect(self.SaveChange)
         self.pushButton_3.clicked.connect(lambda  _,dataline = "数据库地址"           ,linename =self.lineEdit   :self.openfile_and_select(dataline,linename))
         self.pushButton_4.clicked.connect(lambda  _,dataline = "隐患整改通知书生成地址",linename =self.lineEdit_2 :self.select_folder(dataline,linename))
@@ -429,7 +451,8 @@ class HiddenSetConfigWindow(QDialog):
         self.pushButton_7.clicked.connect(lambda  _,dataline = "检查情况统计表生成地址",linename =self.lineEdit_5 :self.select_folder(dataline,linename))
         self.pushButton_8.clicked.connect(lambda  _,dataline = "隐患总台账生成地址"    ,linename =self.lineEdit_6 :self.select_folder(dataline,linename))
         self.pushButton_cl.clicked.connect(lambda _,dataline = "安全检查表生成地址"    ,linename =self.lineEdit_cl:self.select_folder(dataline,linename))
-       
+        self.pushButton_wxlxd.clicked.connect(lambda _,dataline = "工程维修联系单生成地址",linename =self.lineEdit_wxlxd:self.select_folder(dataline,linename))
+        
         self.pushButton_9.clicked.connect(lambda  _,dataline = "隐患整改通知书模板"    ,linename =self.lineEdit_13:self.openfile_and_select(dataline,linename))
         self.pushButton_10.clicked.connect(lambda _,dataline = "隐患整改确认单模板"    ,linename =self.lineEdit_14:self.openfile_and_select(dataline,linename))
         self.pushButton_11.clicked.connect(lambda _,dataline = "每月通报模板"          ,linename =self.lineEdit_16:self.openfile_and_select(dataline,linename))
@@ -486,19 +509,20 @@ class HiddenSetConfigWindow(QDialog):
         self.lineEdit_5 .setText(settings.value("检查情况统计表生成地址", QVariant("")))  
         self.lineEdit_6 .setText(settings.value("隐患总台账生成地址"    , QVariant("")))    
         self.lineEdit_cl .setText(settings.value("安全检查表生成地址"   , QVariant("")))    
-        
+        self.lineEdit_wxlxd.setText(settings.value("工程维修联系单生成地址", QVariant("")))
+
         self.lineEdit_13.setText(settings.value("隐患整改通知书模板"    , QVariant("")))    
         self.lineEdit_14.setText(settings.value("隐患整改确认单模板"    , QVariant("")))    
         self.lineEdit_16.setText(settings.value("每月通报模板"          , QVariant("")))    
         self.lineEdit_clm.setText(settings.value("检查表模板"           , QVariant("")))    
-        
-        self.lineEdit_7 .setText(settings.value("检查类型下拉列表"     , QVariant("")))    
-        self.lineEdit_8 .setText(settings.value("隐患类型下拉列表"     , QVariant("")))     
-        self.lineEdit_9 .setText(settings.value("隐患级别下拉列表"     , QVariant("")))   
-        self.lineEdit_10.setText(settings.value("被检查单位预置内容"   , QVariant("")))   
-        self.lineEdit_11.setText(settings.value("检查人员预置内容"     , QVariant("")))    
-        self.lineEdit_12.setText(settings.value("检查地点预置内容"     , QVariant("")))   
-        self.text_edit  .setText(settings.value("快速剪切板预置内容"   , QVariant("")))   
+
+        self.lineEdit_7 .setText(settings.value("检查类型下拉列表"      , QVariant("")))    
+        self.lineEdit_8 .setText(settings.value("隐患类型下拉列表"      , QVariant("")))     
+        self.lineEdit_9 .setText(settings.value("隐患级别下拉列表"      , QVariant("")))   
+        self.lineEdit_10.setText(settings.value("被检查单位预置内容"    , QVariant("")))   
+        self.lineEdit_11.setText(settings.value("检查人员预置内容"      , QVariant("")))    
+        self.lineEdit_12.setText(settings.value("检查地点预置内容"      , QVariant("")))   
+        self.text_edit  .setText(settings.value("快速剪切板预置内容"    , QVariant("")))   
 
 
 # # #%%主程序入口
